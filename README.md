@@ -3,7 +3,7 @@ Implementation of vehicle paltoon
 
 Simulation Video: 
 
-<video src='https://gifs.com/gif/p-gpNm3Z' width=180/>
+<iframe src='//gifs.com/embed/p-gpNm3Z' frameborder='0' scrolling='no' width='854px' height='480px' style='-webkit-backface-visibility: hidden;-webkit-transform: scale(1);' ></iframe>
 
 
 If you use the code, please cite our papers: 
