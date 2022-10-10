@@ -2,9 +2,8 @@ Implementation of vehicle paltoon
 
 
 Simulation Video: 
-[![Watch the video](https://vimeo.com/manage/videos/127371384)
 
-<video src='[your URL here](https://vimeo.com/manage/videos/127371384)' width=180/>
+<video src='https://gifs.com/gif/p-gpNm3Z' width=180/>
 
 
 If you use the code, please cite our papers: 
