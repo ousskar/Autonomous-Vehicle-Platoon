@@ -3,7 +3,7 @@ Implementation of vehicle paltoon
 
 Simulation Video: 
 
-![Watch the video](https://github.com/ousskar/Autonomous-Vehicle-Platoon/tree/main/img)
+![Watch the video](https://github.com/ousskar/Autonomous-Vehicle-Platoon/tree/main/img/Platoon.gif)
 
 
 If you use the code, please cite our papers: 
