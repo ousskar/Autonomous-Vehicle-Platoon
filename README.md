@@ -1,8 +1,14 @@
-Implementation of vehicle paltoon
-Simulation Video: 
+# Project: Vehicle Platoon
+
+
+
+## Description
+
+
+
+
+## Simulation Video: 
 ![platoon](https://user-images.githubusercontent.com/4749204/194799677-f1d4a553-048c-4cdf-bc1f-ee85e8910a86.gif)
-
-
 
 
 
