@@ -1,0 +1,7 @@
+Webots Proto Cache File version 1.2
+protoFileHash: bb81c4f3e8dd38565a8d017a6aea77c6
+containsDevices: 0
+baseType: Slot
+slotType: automobile\swheel
+parameters: 
+info: Model\sof\sthe\sCitroën\sC-Zero\sfront\swheels\susing\sthe\sgeneric\sAutomobileWheel\sproto\nincluding\sphysic\sproperties\sand\stextures\nThe\scontactMaterial\sis\s"CitroenCZeroWheels"\nSize:\s145/65/R15\nAuthor:\sdavid.mansolino@epfl.ch\nSponsored\sby\sthe\sCTI\sproject\sRO2IVSim\s(http://transport.epfl.ch/simulator-for-mobile-robots-and-intelligent-vehicles)\nCopyright\s(c)\s2014\sCyberbotics\sLtd.,\sall\srights\sreserved.

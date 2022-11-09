@@ -1,0 +1,7 @@
+Webots Proto Cache File version 1.2
+protoFileHash: a14d7e12cf0176d2de4f0144ee84eb02
+containsDevices: 0
+baseType: Slot
+slotType: automobile\swheel
+parameters: thickness,tireRadius,subdivision,curvatureFactor,edgeSubdivision,rimRadius,rimBeamNumber,rimBeamWidth,centralInnerRadius,centralOuterRadius,rimBeamThickness,rimBeamOffset,contactMaterial,tireAppearance,rimAppearance,physics,logoSlot
+info: Generic\smodel\sof\san\sautomobile\swheel\simplemented\sat\sthe\sSolid-node\slevel.\nThe\sdimensions\sof\sthe\swheel\scan\sbe\sset\swith\sthe\sparmameters\s'thickness'\sand\s'tireRadius'.\nThe\squality\sof\sthe\scylinder\sapproximation\scan\sbe\sset\swith\sthe\sparameter\s'subdivision'.\nThe\ssubdivision\sand\ssize\sof\sthe\sround\sedges\sof\sthe\stire\scan\sbe\sset\swith\sthe\sparameters\s'curvatureFactor'\sand\s'edgeSubdivision'.\nThe\ssize,\sshape\sand\sposition\sof\sthe\srim\scan\sbe\sset\swith\sthe\sparameters\s'rimRadius'\s'rimBeamNumber'\s'rimBeamWidth'\s'rimBeamThickness'\s'rimBeamOffset'.\nFinally\sthe\ssize\sof\sthe\scentral\spart\sof\sthe\srim\scan\sbe\sset\swith\sthe\sparameters\s'centralInnerRadius'\sand\s'centralOuterRadius'.\nAuthor:\sdavid.mansolino@epfl.ch\nSponsored\sby\sthe\sCTI\sproject\sRO2IVSim\s(http://transport.epfl.ch/simulator-for-mobile-robots-and-intelligent-vehicles)\nCopyright\s(c)\s2014\sCyberbotics\sLtd.,\sall\srights\sreserved.

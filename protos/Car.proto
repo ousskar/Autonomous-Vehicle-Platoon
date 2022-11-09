@@ -1,0 +1,309 @@
+#VRML_SIM V7.4.3 utf8
+# Generic model of Car using the AckermanVehicle proto.
+# Author: david.mansolino@epfl.ch
+# Sponsored by the CTI project RO2IVSim (http://transport.epfl.ch/simulator-for-mobile-robots-and-intelligent-vehicles)
+# Copyright (c) 2014 Cyberbotics Ltd., all rights reserved.
+
+PROTO Car [
+#fields inherited from AckermannVehicle
+  field SFVec3f    translation                    0 0.4 0
+  field SFRotation rotation                       0 1 0 0.0
+  field SFString   name                           "vehicle"
+  field SFString   model                          "AckermannVehicle"
+  field SFString   controller                     "void"
+  field SFString   controllerArgs                 ""
+  field SFBool     synchronization                TRUE 
+  field SFFloat    trackFront                     1.7
+  field SFFloat    trackRear                      1.7
+  field SFFloat    wheelbase                      4.0 
+  field SFFloat    minSteeringAngle              -1
+  field SFFloat    maxSteeringAngle               1
+  field SFFloat    suspensionFrontSpringConstant  100000
+  field SFFloat    suspensionFrontDampingConstant 4000
+  field SFFloat    suspensionRearSpringConstant   100000
+  field SFFloat    suspensionRearDampingConstant  4000
+  field SFFloat    wheelsDampingConstant          5
+  field MFNode     extensionSlot                  [ AutomobileLights { } ]
+  field SFNode     boundingObject                 NULL
+  field SFNode     physics                        NULL
+  field SFNode     wheelFrontRight                AutomobileWheel { }
+  field SFNode     wheelFrontLeft                 AutomobileWheel { }
+  field SFNode     wheelRearRight                 AutomobileWheel { }
+  field SFNode     wheelRearLeft                  AutomobileWheel { }
+#fields specific to Car
+  field SFString   type                           "traction"    # traction, propulsion or 4x4
+  field SFString   engineType                     "combustion"  # combustion, electric, parallel hybrid or power-split hybrid
+  field SFFloat    brakeCoefficient               500
+  field SFFloat    time0To100                     10.0
+  field SFFloat    engineMaxTorque                250   # maximum torque of the motor [Nm] used to compute the electric engine torque
+  field SFFloat    engineMaxPower                 50000   # maximum power of the motor [W] used to compute the electric engine torque
+  field SFFloat    engineMinRPM                   1000  # only used in the case of combustion engine
+  field SFFloat    engineMaxRPM                   4500
+  field SFVec3f    engineFunctionCoefficients     150 0.1 0  # used to compute the combustion engine torque
+  field MFFloat    gearRatio                      [-12 10 7 5 2.5 1]
+  field SFFloat    hybridPowerSplitRatio          0.25 # only used in the case of 'power-split hybrid' engineType
+  field SFFloat    hybridPowerSplitRPM            3000 # only used in the case of 'power-split hybrid' engineType
+]
+{
+  %{
+    -- check validity of the value of the fields
+    -- tracks check
+    local frontTrack = fields.trackFront
+    if frontTrack <= 0.0 then
+      io.stderr:write("'trackFront' should be bigger than 0.\n")
+      io.stderr:write("'trackFront' has been reseted to '1.7'.\n")
+      frontTrack = 1.7
+    end
+    local rearTrack = fields.trackRear
+    if rearTrack <= 0.0 then
+      io.stderr:write("'trackRear' should be bigger than 0.\n")
+      io.stderr:write("'trackRear' was reset to '1.7'.\n")
+      rearTrack = 1.7
+    end
+    -- wheelbase check
+    local wheelbase = fields.wheelbase
+    if wheelbase <= 0.0 then
+      io.stderr:write("'wheelbase' should be bigger than 0.\n")
+      io.stderr:write("'wheelbase' was reset to '4.0'.\n")
+      wheelbase = 4.0
+    end
+    -- type check
+    local type = fields.type
+    if type ~= "traction" and type ~= "propulsion" and type ~= "4x4" then
+      io.stderr:write("Unsupported value for 'type': " .. type .. "\n")
+      io.stderr:write("Supported 'type' values are: 'traction', 'propulsion' or '4x4'.\n")
+      io.stderr:write("'type' was reset to 'traction'.\n")
+      type = "traction"
+    end
+    -- engineType check
+    local engineType = fields.engineType
+    if engineType ~= "combustion" and engineType ~= "electric" and engineType ~= "parallel hybrid" and engineType ~= "power-split hybrid" then
+      io.stderr:write("Unsupported value for 'engineType': " .. engineType .. "\n")
+      io.stderr:write("Supported 'engineType' values are: 'combustion', 'electric', 'parallel hybrid' or 'power-split hybrid'.\n")
+      io.stderr:write("'engineType' was reset to 'combustion'.\n")
+      engineType = "combustion"
+    end
+    -- brakeCoefficient check
+    local brakeCoefficient = fields.brakeCoefficient
+    if brakeCoefficient <= 0.0 then
+      io.stderr:write("'brakeCoefficient' should be strictly positive.\n")
+      io.stderr:write("'brakeCoefficient' was reset to 10000.\n")
+      brakeCoefficient = 10000
+    end
+    -- time0To100 check
+    local time0To100 = fields.time0To100
+    if time0To100 <= 0.0 then
+      io.stderr:write("'time0To100' should be strictly positive.\n")
+      io.stderr:write("'time0To100' was reset to 10.0.\n")
+      time0To100 = 10.0
+    end
+    -- wheelsDampingConstant check
+    local wheelsDampingConstant = fields.wheelsDampingConstant
+    if wheelsDampingConstant < 0.0 then
+      io.stderr:write("'wheelsDampingConstant' should be positive.\n")
+      io.stderr:write("'brakeCoefficient' was reset to 5.\n")
+      brakeCoefficient = 5
+    end
+    -- engineMaxTorque and engineMaxPower check
+    local engineMaxTorque = fields.engineMaxTorque
+    if engineMaxTorque <= 0.0 then
+      io.stderr:write("'engineMaxTorque' should be bigger than 0.\n")
+      io.stderr:write("'engineMaxTorque' was reset to '250'.\n")
+      engineMaxTorque = 250
+    end
+    local engineMaxPower = fields.engineMaxPower
+    if engineMaxPower <= 0.0 then
+      io.stderr:write("'engineMaxPower' should be bigger than 0.\n")
+      io.stderr:write("'engineMaxPower' was reset to '50000'\n")
+      engineMaxPower = 50000
+    end
+    -- engineMinRPM and engineMaxRPM check
+    local engineMinRPM = fields.engineMinRPM
+    if engineMinRPM <= 0.0 then
+      io.stderr:write("'engineMinRPM' should be bigger than 0.\n")
+      io.stderr:write("'engineMinRPM' was reset to '1000'.\n")
+      engineMinRPM = 1000
+    end
+    local engineMaxRPM = fields.engineMaxRPM
+    if engineMaxRPM <= engineMinRPM then
+      io.stderr:write("'engineMaxRPM' should be bigger than 'engineMinRPM'.\n")
+      io.stderr:write("'engineMaxRPM' was reset to five times the value of 'engineMinRPM'.\n")
+      engineMaxRPM = 5 * engineMinRPM
+    end
+    -- hybridPowerSplitRatio check
+    local hybridPowerSplitRatio = fields.hybridPowerSplitRatio
+    if hybridPowerSplitRatio < 0 or hybridPowerSplitRatio > 1 then
+      io.stderr:write("'hybridPowerSplitRatio' should be in the range [0,1].\n")
+      io.stderr:write("'hybridPowerSplitRatio' was reset to '0.25'.\n")
+      hybridPowerSplitRatio = 0.25
+    end
+    -- hybridPowerSplitRPM check
+    local hybridPowerSplitRPM = fields.hybridPowerSplitRPM
+    if hybridPowerSplitRPM < 0 then
+      io.stderr:write("'hybridPowerSplitRPM' should be bigger than 'hybridPowerSplitRPM'.\n")
+      io.stderr:write("'hybridPowerSplitRPM' was reset to '3000'.\n")
+      hybridPowerSplitRPM = 3000
+    end
+    -- front wheels, the slot should be a proto with the 'tireRadius' fields 
+    local frontTireRadius = -1
+    local node = fields.wheelFrontRight
+    while node do
+      if node.fields.tireRadius then
+        frontTireRadius = node.fields.tireRadius
+      end
+      node = node.super
+    end
+    -- rear wheels, the slot should be a proto with the 'tireRadius' fields 
+    local rearTireRadius = -1
+    local node = fields.wheelRearRight
+    while node do
+      if node.fields.tireRadius then
+        rearTireRadius = node.fields.tireRadius
+      end
+      node = node.super
+    end
+
+    -- compute the acelerations of the rotational motors from 'time0To100'
+    local frontAcceleration = 0
+    local rearAcceleration = 0
+    if frontTireRadius == -1 then # use 0.4 if radius not found
+      # 1000 / 36 => 100km/h => m/s
+      frontAcceleration = 1000 / 36 / time0To100 / 0.4
+    else
+      frontAcceleration = 1000 / 36 / time0To100 / frontTireRadius
+    end
+    if rearTireRadius == -1 then # use 0.4 if radius not found
+      rearAcceleration = 1000 / 36 / time0To100 / 0.4
+    else
+      rearAcceleration = 1000 / 36 / time0To100 / rearTireRadius
+    end
+
+    -- compute the 'data' string which is used to communicate configuration of the vehicle to the library
+    -- the structure is the following: "wheelbase frontTrack rearTrack frontWheelsRadius (-1 if no wheel detected) rearWheelsRadius (-1 if no wheel detected) brakeCoefficient wheelsDampingConstant engineType engineMaxTorque engineMaxPower engineMinRPM engineMaxRPM engineFunctionCoefficients[0] engineFunctionCoefficients[1] engineFunctionCoefficients[2] hybridPowerSplitRatio hybridPowerSplitRPM sizeOfGearRatio gearRatio0 gearRatio1 .. gearRatioN" (more will be added).
+    local data = '"' .. wheelbase .. ' ' .. frontTrack ..' ' .. rearTrack .. ' '
+    -- front wheels tire radius if found (-1 otherwise)
+    data = data .. frontTireRadius .. ' '
+    -- rear wheels tire radius if found (-1 otherwise)
+    data = data .. rearTireRadius .. ' '
+    -- brake caracteristic
+    data = data .. brakeCoefficient .. ' '
+    -- wheels dampingConstant
+    data = data .. wheelsDampingConstant .. ' '
+    -- engine type
+    if engineType == "combustion" then
+      data = data .. 'C '
+    elseif engineType == "electric" then
+      data = data .. 'E '
+    elseif engineType == "parallel hybrid" then
+      data = data .. 'P '
+    else
+      data = data .. 'S '
+    end
+    -- engine min and max rotating speed engineMaxTorque engineMaxPower
+    data = data .. engineMaxTorque .. ' ' .. engineMaxPower .. ' '
+    -- engine min and max rotating speed
+    data = data .. engineMinRPM .. ' ' .. engineMaxRPM .. ' '
+    data = data .. fields.engineFunctionCoefficients.x .. ' ' .. fields.engineFunctionCoefficients.y .. ' ' .. fields.engineFunctionCoefficients.z .. ' '
+    -- hybrid power split caracteristics
+    data = data .. hybridPowerSplitRatio .. ' ' .. hybridPowerSplitRPM .. ' '
+    -- gear number and ratio of each gear
+    local gearNumber = 0
+    for key,value in pairs(fields.gearRatio) do gearNumber = gearNumber + 1 end    #TODO need to add check on the value
+    data = data .. gearNumber .. ' '
+    for key,value in pairs(fields.gearRatio) do data = data .. value .. ' ' end
+    -- close the data string
+    data = data .. '"'
+  }%
+  
+  AckermannVehicle {
+    translation IS translation
+    rotation IS rotation
+    name IS name
+    model IS model
+    controller IS controller
+    controllerArgs IS controllerArgs
+    synchronization IS synchronization
+    trackFront IS trackFront
+    trackRear IS trackRear
+    wheelbase IS wheelbase
+    minSteeringAngle IS minSteeringAngle
+    maxSteeringAngle IS maxSteeringAngle
+    suspensionFrontSpringConstant IS suspensionFrontSpringConstant
+    suspensionFrontDampingConstant IS suspensionFrontDampingConstant
+    suspensionRearSpringConstant IS suspensionRearSpringConstant
+    suspensionRearDampingConstant IS suspensionRearDampingConstant
+    wheelsDampingConstant IS wheelsDampingConstant
+    extensionSlot IS extensionSlot
+    boundingObject IS boundingObject
+    physics IS physics
+    wheelFrontRight IS wheelFrontRight
+    wheelFrontLeft IS wheelFrontLeft
+    wheelRearRight IS wheelRearRight
+    wheelRearLeft IS wheelRearLeft
+    data %{= data }%
+    axisDevicesFrontRight [
+    %{ if type == "traction" or type == "4x4" then }%
+      RotationalMotor {
+        name "right_front_wheel"
+        acceleration %{= frontAcceleration }%
+        maxVelocity 200
+        maxTorque 10000
+      }
+    %{ end }%
+      PositionSensor {
+        name "right_front_sensor"
+      }
+      Brake {
+        name "right_front_brake"
+      }
+    ]
+    axisDevicesFrontLeft [
+    %{ if type == "traction" or type == "4x4" then }%
+      RotationalMotor {
+        name "left_front_wheel"
+        acceleration %{= frontAcceleration }%
+        maxVelocity 200
+        maxTorque 10000
+      } 
+    %{ end }%
+      PositionSensor {
+        name "left_front_sensor"
+      }
+      Brake {
+        name "left_front_brake"
+      }
+    ]
+    axisDevicesRearRight [
+    %{ if type == "propulsion" or type == "4x4" then }%
+      RotationalMotor {
+        name "right_rear_wheel"
+        acceleration %{= rearAcceleration }%
+        maxVelocity 200
+        maxTorque 10000
+      }
+    %{ end }%
+      PositionSensor {
+        name "right_rear_sensor"
+      }
+      Brake {
+        name "right_rear_brake"
+      }
+    ]
+    axisDevicesRearLeft [
+    %{ if type == "propulsion" or type == "4x4" then }%
+      RotationalMotor {
+        name "left_rear_wheel"
+        acceleration %{= rearAcceleration }%
+        maxVelocity 200
+        maxTorque 10000
+      }
+    %{ end }%
+      PositionSensor {
+        name "left_rear_sensor"
+      }
+      Brake {
+        name "left_rear_brake"
+      }
+    ]
+  }
+}

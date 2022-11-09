@@ -1,0 +1,201 @@
+#VRML_SIM V7.4.3 utf8
+# Generic model of an Ackerman vehicle. Positions and joints of the wheels are set automatically 
+# using 'trackFont', 'trackRear' and 'wheelbase' fields
+# Author: david.mansolino@epfl.ch
+# Sponsored by the CTI project RO2IVSim (http://transport.epfl.ch/simulator-for-mobile-robots-and-intelligent-vehicles)
+# Copyright (c) 2014 Cyberbotics Ltd., all rights reserved.
+
+PROTO AckermannVehicle [
+  field SFVec3f    translation                    0 0.4 0
+  field SFRotation rotation                       0 1 0 0.0
+  field SFString   name                           "vehicle"
+  field SFString   model                          "AckermannVehicle"
+  field SFString   controller                     "void"
+  field SFString   controllerArgs                 ""
+  field SFBool     synchronization                TRUE 
+  field SFFloat    trackFront                     1.7
+  field SFFloat    trackRear                      1.7
+  field SFFloat    wheelbase                      4.0 
+  field SFFloat    minSteeringAngle              -1
+  field SFFloat    maxSteeringAngle               1
+  field SFFloat    suspensionFrontSpringConstant  100000
+  field SFFloat    suspensionFrontDampingConstant 4000
+  field SFFloat    suspensionRearSpringConstant   100000
+  field SFFloat    suspensionRearDampingConstant  4000
+  field SFFloat    wheelsDampingConstant          5
+  field MFNode     extensionSlot                  NULL
+  field SFNode     boundingObject                 NULL
+  field SFNode     physics                        NULL
+  field SFNode     wheelFrontRight                AutomobileWheel { }
+  field SFNode     wheelFrontLeft                 AutomobileWheel { }
+  field SFNode     wheelRearRight                 AutomobileWheel { }
+  field SFNode     wheelRearLeft                  AutomobileWheel { }
+  field MFNode     axisDevicesFrontRight          [ ]
+  field MFNode     axisDevicesFrontLeft           [ ]
+  field MFNode     axisDevicesRearRight           [ ]
+  field MFNode     axisDevicesRearLeft            [ ]
+  field SFString   data                           ""
+
+]
+{
+  %{
+    -- tracks check
+    local frontTrack = fields.trackFront
+    if frontTrack <= 0.0 then
+      io.stderr:write("'trackFront' should be bigger than 0.\n")
+      io.stderr:write("'trackFront' has been reseted to '1.7'.\n")
+      frontTrack = 1.7
+    end
+    local rearTrack = fields.trackRear
+    if rearTrack <= 0.0 then
+      io.stderr:write("'trackRear' should be bigger than 0.\n")
+      io.stderr:write("'trackRear' was reset to '1.7'.\n")
+      rearTrack = 1.7
+    end
+
+    -- wheelbase check
+    local wheelbase = fields.wheelbase
+    if wheelbase <= 0.0 then
+      io.stderr:write("'wheelbase' should be bigger than 0.\n")
+      io.stderr:write("'wheelbase' was reset to '4.0'.\n")
+      wheelbase = 4.0
+    end
+  }%
+  
+  Robot {
+    translation IS translation
+    rotation IS rotation
+    children [
+      DEF LEFT_STEER_HINGE2 Hinge2Joint {
+        jointParameters HingeJointParameters {
+          axis 0 -1 0
+          anchor %{= frontTrack/2 }% 0 %{= wheelbase }%
+          suspensionSpringConstant IS suspensionFrontSpringConstant
+          suspensionDampingConstant IS suspensionFrontDampingConstant
+          suspensionAxis 0 1 0
+        }
+        jointParameters2 JointParameters {
+          axis 1 0 0
+          dampingConstant IS wheelsDampingConstant
+        }
+        device [
+          RotationalMotor {
+            name "left_steer"
+            minPosition IS minSteeringAngle
+            maxPosition IS maxSteeringAngle
+            maxTorque 10000
+          }
+        ]
+        device2 IS axisDevicesFrontLeft
+        endPoint Solid {
+          translation %{= frontTrack/2 }% 0 %{= wheelbase }%
+          rotation 0 0 1 -1.5708
+          children [ 
+            Slot {
+              type "automobile wheel"
+              endPoint IS wheelFrontLeft
+            }
+          ]
+          boundingObject DEF DUMMY_SPHERE Sphere {
+            radius 0.001
+          }
+          physics DEF DUMMY_PHYS Physics {
+            density -1
+            mass 0.05
+          }
+        }
+      }
+      DEF RIGHT_STEER_HINGE2 Hinge2Joint {
+        jointParameters HingeJointParameters {
+          axis 0 -1 0
+          anchor %{= -frontTrack/2 }% 0 %{= wheelbase }%
+          suspensionSpringConstant IS suspensionFrontSpringConstant
+          suspensionDampingConstant IS suspensionFrontDampingConstant
+          suspensionAxis 0 1 0
+        }
+        jointParameters2 JointParameters {
+          axis 1 0 0
+          dampingConstant IS wheelsDampingConstant
+        }
+        device [
+          RotationalMotor {
+            name "right_steer"
+            minPosition IS minSteeringAngle
+            maxPosition IS maxSteeringAngle
+            maxTorque 10000
+          }
+        ]
+        device2 IS axisDevicesFrontRight
+        endPoint Solid {
+          translation %{= -frontTrack/2 }% 0 %{= wheelbase }%
+          rotation 0 0 1 1.5708
+          children [ 
+            Slot {
+              type "automobile wheel"
+              endPoint IS wheelFrontRight
+            }
+          ]
+          boundingObject USE DUMMY_SPHERE
+          physics USE DUMMY_PHYS
+        }
+      }
+      DEF LEFT_REAR_WHEEL_HINGE HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 1 0 0
+          anchor %{= -rearTrack/2 }% 0 0
+          dampingConstant IS wheelsDampingConstant
+          suspensionSpringConstant IS suspensionRearSpringConstant
+          suspensionDampingConstant IS suspensionRearDampingConstant
+          suspensionAxis 0 1 0
+        }
+        device IS axisDevicesRearRight
+        endPoint Solid {
+          translation %{= -rearTrack/2 }% 0 0
+          rotation 0 0 1 1.5708
+          children [ 
+            Slot {
+              type "automobile wheel"
+              endPoint IS wheelRearRight
+            }
+          ]
+          boundingObject USE DUMMY_SPHERE
+          physics USE DUMMY_PHYS
+        }
+      }
+      DEF RIGHT_REAR_WHEEL_HINGE HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 1 0 0
+          anchor %{= rearTrack/2 }% 0 0
+          dampingConstant IS wheelsDampingConstant
+          suspensionSpringConstant IS suspensionRearSpringConstant
+          suspensionDampingConstant IS suspensionRearDampingConstant
+          suspensionAxis 0 1 0
+        }
+        device IS axisDevicesRearLeft
+        endPoint Solid {
+          translation %{= rearTrack/2 }% 0 0
+          rotation 0 0 1 -1.5708
+          children [ 
+            Slot {
+              type "automobile wheel"
+              endPoint IS wheelRearLeft
+            }
+          ]
+          boundingObject USE DUMMY_SPHERE
+          physics USE DUMMY_PHYS
+        }
+      }
+      Group {
+        children IS extensionSlot
+      }
+    ]
+    name IS name
+    model IS model
+    controller IS controller
+    controllerArgs IS controllerArgs
+    data IS data
+    synchronization IS synchronization
+    boundingObject IS boundingObject
+    physics IS physics
+  }
+}
