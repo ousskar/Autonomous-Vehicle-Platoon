@@ -3,8 +3,7 @@
 
 ## Description
 This project aims to implement a platoon of vehicles using PID control technique. 
-Specifically, the longitudinal and lateral control of the vehicle uses different PID controls with some modification in the 
-equation. More details can be found in this paper. 
+Specifically, the longitudinal and lateral control of the vehicle uses different PID controls with some modification in the original PID equation. More details can be found in the following paper. 
 
 
 ## Simulation Video: 
